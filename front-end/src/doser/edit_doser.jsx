@@ -35,8 +35,11 @@ const EditDoser = ({
     }
   }
 
+  // *** sort jack options by name - JFR 20201217
   const jackOptions = () => {
-    return jacks.map(item => {
+    return jacks
+    .sort((a,b) => {return a.name.localeCompare(b.name, navigator.languages[0] || navigator.language, {numeric:true, ignorePunctuation:true})})
+    .map(item => {
       return (
         <option key={item.id} value={item.id}>
           {item.name}

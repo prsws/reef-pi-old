@@ -10,12 +10,14 @@ class outlets extends React.Component {
   constructor (props) {
     super(props)
     const d = props.drivers.filter(d => d.id === 'rpi')[0]
+    // *** added outUseAsJack - JFR 20201216
     this.state = {
       outName: '',
       outPin: 0,
       outReverse: false,
       add: false,
-      driver: d
+      driver: d,
+      outUseAsJack: false
     }
     this.list = this.list.bind(this)
     this.handleAdd = this.handleAdd.bind(this)
@@ -25,6 +27,8 @@ class outlets extends React.Component {
     this.onPinChange = this.onPinChange.bind(this)
     this.handleReverseChange = this.handleReverseChange.bind(this)
     this.handleDriverChange = this.handleDriverChange.bind(this)
+    // *** added handleUseAsJackChange - JFR 20201216
+    this.handleUseAsJackChange = this.handleUseAsJackChange.bind(this)
   }
 
   handleDriverChange (e) {
@@ -46,6 +50,11 @@ class outlets extends React.Component {
     this.setState({ outReverse: !this.state.outReverse })
   }
 
+  // *** added handleUseAsJackChange - JFR 20201216
+  handleUseAsJackChange () {
+    this.setState({ outUseAsJack: !this.state.outUseAsJack })
+  }
+
   remove (id) {
     return function () {
       confirm('Are you sure ?').then(
@@ -61,20 +70,24 @@ class outlets extends React.Component {
   }
 
   handleAdd () {
-    this.setState({
+      // *** added outUseAsJack - JFR 20201216
+      this.setState({
       add: !this.state.add,
       outName: '',
       outPin: 0,
-      outReverse: false
+      outReverse: false,
+      outUseAsJack: false
     })
   }
 
   handleSave () {
-    const payload = {
+      // *** added outUseAsJack - JFR 20201216
+      const payload = {
       name: this.state.outName,
       pin: this.state.outPin,
       reverse: this.state.outReverse,
-      driver: this.state.driver.id
+      driver: this.state.driver.id,
+      outUseAsJack: this.state.outUseAsJack
     }
     this.props.create(payload)
     this.handleAdd()
@@ -91,12 +104,14 @@ class outlets extends React.Component {
       })
       .forEach((o, i) => {
         list.push(
+          // *** added useasjack - JFR 20201216
           <Outlet
             name={o.name}
             outlet_id={o.id}
             pin={o.pin}
             key={o.id}
             reverse={o.reverse}
+            useasjack={o.useasjack}
             equipment={o.equipment}
             remove={this.remove(o.id)}
             drivers={this.props.drivers}
@@ -187,7 +202,19 @@ class outlets extends React.Component {
               />
             </div>
           </div>
-          <div className='col-12 col-md-3 text-right'>
+          <div className='col-12 col-md-2'>
+            <div className='form-group'>
+              <span className='input-group-addon'> {i18next.t('useasjack')} </span>
+              <input
+                type='checkbox'
+                id='outletUseAsJack'
+                onChange={this.handleUseAsJackChange}
+                className='form-control'
+                checked={this.state.outUseAsJack}
+              />
+            </div>
+          </div>
+          <div className='col-12 col-md-2 text-right'>
             <input
               type='button'
               id='createOutlet'

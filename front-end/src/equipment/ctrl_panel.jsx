@@ -44,7 +44,7 @@ class ctrl_panel extends React.Component {
     
     return (
       <div className='container'>
-        <span className='h6' style={{color: 'red'}}>EXPERIMENTAL: Equipment Control Panel</span><br /><br />
+        <span className='h6' >Equipment Switch Panel</span><br /><br />
         <div className='row'>
           {this.props.equipment.sort((a, b) => {
               return a.name.localeCompare(b.name, navigator.languages[0] || navigator.language, {numeric:true, ignorePunctuation:true});
@@ -53,7 +53,7 @@ class ctrl_panel extends React.Component {
                 <div className='col-12 col-sm-6 col-md-2 col-lg-3 order-sm-3'>
                   <FormControlLabel
                     control={<Switch on={item.on} onClick={(e) => {this.toggleState(e, item.id, item.name, item.on, item.outlet)}} />}
-                    label={item.name}
+                    label={' ' + item.name}
                   />
                 </div>
               )

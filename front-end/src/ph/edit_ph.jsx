@@ -31,8 +31,11 @@ const EditPh = ({
     }
   }
 
+  // *** sort analog input options by name - JFR 20201217
   const analogInputOptions = () => {
-    return analogInputs.map(item => {
+    return analogInputs
+    .sort((a,b) => {return a.name.localeCompare(b.name, navigator.languages[0] || navigator.language, {numeric:true, ignorePunctuation:true})})
+    .map(item => {
       return (
         <option key={item.id} value={item.id}>
           {item.name}
@@ -46,7 +49,10 @@ const EditPh = ({
 
     if (values.control === 'equipment') { opts = equipment } else if (values.control === 'macro') { opts = macros }
 
-    return opts.map(item => {
+    // *** sort options by name - JFR 20201217
+    return opts
+    .sort((a,b) => {return a.name.localeCompare(b.name, navigator.languages[0] || navigator.language, {numeric:true, ignorePunctuation:true})})
+    .map(item => {
       return (
         <option key={item.id} value={item.id}>
           {item.name}

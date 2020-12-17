@@ -6,13 +6,15 @@ import i18next from 'i18next'
 export default class Outlet extends React.Component {
   constructor (props) {
     super(props)
+    // *** added useasjack - JFR 20201216
     this.state = {
       edit: false,
       name: props.name,
       pin: props.pin,
       reverse: props.reverse,
       lbl: i18next.t('edit'),
-      driver: props.driver || {}
+      driver: props.driver || {},
+      useasjack: props.useasjack
     }
     this.handleEdit = this.handleEdit.bind(this)
     this.editUI = this.editUI.bind(this)
@@ -22,6 +24,8 @@ export default class Outlet extends React.Component {
     this.handleReverseChange = this.handleReverseChange.bind(this)
     this.handleDriverChange = this.handleDriverChange.bind(this)
     this.handleRemove = this.handleRemove.bind(this)
+    // *** added useasjack - JFR 20201215
+    this.handleJackUsageChange = this.handleJackUsageChange.bind(this)
   }
 
   handleNameChange (e) {
@@ -32,6 +36,11 @@ export default class Outlet extends React.Component {
     this.setState({ pin: v })
   }
 
+    // *** added useasjack - JFR 20201216
+    handleJackUsageChange(v) {
+      this.setState({useasjack: !this.state.useasjack})
+    }
+  
   handleReverseChange () {
     this.setState({ reverse: !this.state.reverse })
   }
@@ -51,20 +60,24 @@ export default class Outlet extends React.Component {
       })
       return
     }
+    // *** added useasjack - JFR 20201216
     const payload = {
       name: this.state.name,
       pin: this.state.pin,
       reverse: this.state.reverse,
       equipment: this.props.equipment,
-      driver: this.state.driver.id
+      driver: this.state.driver.id,
+      useasjack: this.state.useasjack
     }
     this.props.update(payload)
+    // *** added useasjack - JFR 20201216
     this.setState({
       edit: false,
       lbl: i18next.t('edit'),
       name: payload.name,
       pin: payload.pin,
-      reverse: payload.reverse
+      reverse: payload.reverse,
+      useasjack: payload.useasjack
     })
   }
 
@@ -100,6 +113,16 @@ export default class Outlet extends React.Component {
               className='form-control outlet-reverse'
               id={'outlet-' + this.props.outlet_id + '-reverse'}
               checked={this.state.reverse}
+            />
+          </div>
+          <div className='form-group'>
+            <span className='input-group-addon'>{i18next.t('useasjack')}</span>
+            <input
+              type='checkbox'
+              onChange={this.handleJackUsageChange}
+              className='form-control outlet-reverse'
+              id={'outlet-' + this.props.outlet_id + '-useasjack'}
+              checked={this.state.useasjack}
             />
           </div>
         </div>
@@ -171,6 +194,7 @@ export default class Outlet extends React.Component {
   }
 }
 
+// *** added useasjack - JFR 20201216
 Outlet.propTypes = {
   name: PropTypes.string.isRequired,
   pin: PropTypes.number.isRequired,
@@ -180,5 +204,6 @@ Outlet.propTypes = {
   reverse: PropTypes.bool.isRequired,
   update: PropTypes.func,
   drivers: PropTypes.array.isRequired,
-  driver: PropTypes.object.isRequired
+  driver: PropTypes.object.isRequired,
+  useasjack: PropTypes.bool.isRequired
 }

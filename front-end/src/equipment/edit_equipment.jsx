@@ -45,6 +45,7 @@ const EditEquipment = ({
     return ''
   }
 
+  // *** added outlet filtering if useasjack, sort dropdown values - JFR 20201216
   return (
     <form onSubmit={handleSubmit}>
       <div className='row align-items-start'>
@@ -70,7 +71,10 @@ const EditEquipment = ({
             value={values.outlet}
           >
             <option value='' className='d-none'>-- Select --</option>
-            {outlets.map((item) => {
+            {outlets
+            .filter(oitem => (oitem.useasjack == undefined || oitem.useasjack !== true))
+            .sort((a,b) => {return a.name.localeCompare(b.name, navigator.languages[0] || navigator.language, {numeric:true, ignorePunctuation:true})})
+            .map((item) => {
               return (
                 <option
                   key={item.id}

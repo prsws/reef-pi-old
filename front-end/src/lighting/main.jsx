@@ -39,9 +39,12 @@ class main extends React.Component {
     }
   }
 
+  // *** sort jacks by name - JFR 20201217
   jacksList () {
     const jacks = []
-    this.props.jacks.forEach((jack, i) => {
+    this.props.jacks
+    .sort((a,b) => {return a.name.localeCompare(b.name, navigator.languages[0] || navigator.language, {numeric:true, ignorePunctuation:true})})
+    .forEach((jack, i) => {
       jacks.push(
         <a className='dropdown-item' key={i} onClick={this.setJack(i)}>
           <span id={'select-jack-' + jack.name}>{jack.name}</span>

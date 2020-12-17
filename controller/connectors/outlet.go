@@ -16,6 +16,7 @@ import (
 
 const OutletBucket = storage.OutletBucket
 
+// *** added UseAsJack - JFR 20201216
 // swagger:model outlet
 type Outlet struct {
 	ID        string `json:"id"`
@@ -24,6 +25,7 @@ type Outlet struct {
 	Equipment string `json:"equipment"`
 	Reverse   bool   `json:"reverse"`
 	Driver    string `json:"driver"`
+	UseAsJack bool   `json:"useasjack"`
 }
 
 func (o Outlet) outputPin(drivers *drivers.Drivers) (hal.DigitalOutputPin, error) {
@@ -76,6 +78,12 @@ func (c *Outlets) Configure(id string, on bool) error {
 	if o.Reverse {
 		on = !on
 	}
+
+	// *** added UseAsJack - JFR 20201216
+	if o.UseAsJack {
+		on = !on
+	}
+
 	return pin.Write(on)
 }
 
