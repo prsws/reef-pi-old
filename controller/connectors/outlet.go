@@ -18,6 +18,7 @@ const OutletBucket = storage.OutletBucket
 
 // *** added UseAsJack - JFR 20201216
 // swagger:model outlet
+// *** same as jacks
 type Outlet struct {
 	ID        string `json:"id"`
 	Name      string `json:"name"`
@@ -28,6 +29,13 @@ type Outlet struct {
 	UseAsJack bool   `json:"useasjack"`
 }
 
+// *** same as jacks
+type Outlets struct {
+	store   storage.Store
+	drivers *drivers.Drivers
+}
+
+// *** different from jacks
 func (o Outlet) outputPin(drivers *drivers.Drivers) (hal.DigitalOutputPin, error) {
 	d, err := drivers.DigitalOutputDriver(o.Driver)
 	if err != nil {
@@ -40,6 +48,7 @@ func (o Outlet) outputPin(drivers *drivers.Drivers) (hal.DigitalOutputPin, error
 	return pin, nil
 }
 
+// *** same as jacks
 func (o Outlet) IsValid(drivers *drivers.Drivers) error {
 	if o.Name == "" {
 		return fmt.Errorf("Outlet name can not be empty")
@@ -48,11 +57,7 @@ func (o Outlet) IsValid(drivers *drivers.Drivers) error {
 	return err
 }
 
-type Outlets struct {
-	store   storage.Store
-	drivers *drivers.Drivers
-}
-
+// *** different from jacks
 func NewOutlets(drivers *drivers.Drivers, store storage.Store) *Outlets {
 	return &Outlets{
 		store:   store,
@@ -60,10 +65,65 @@ func NewOutlets(drivers *drivers.Drivers, store storage.Store) *Outlets {
 	}
 }
 
+// *** same as jacks
 func (c *Outlets) Setup() error {
 	return c.store.CreateBucket(OutletBucket)
 }
 
+// *** same as jacks
+func (c *Outlets) Get(id string) (Outlet, error) {
+	var o Outlet
+	return o, c.store.Get(OutletBucket, id, &o)
+}
+
+// *** same as jacks
+func (c *Outlets) List() ([]Outlet, error) {
+	outlets := []Outlet{}
+	fn := func(_ string, v []byte) error {
+		var o Outlet
+		if err := json.Unmarshal(v, &o); err != nil {
+			return err
+		}
+		outlets = append(outlets, o)
+		return nil
+	}
+	return outlets, c.store.List(OutletBucket, fn)
+}
+
+// *** same as jacks
+func (c *Outlets) Create(o Outlet) error {
+	if err := o.IsValid(c.drivers); err != nil {
+		return err
+	}
+	fn := func(id string) interface{} {
+		o.ID = id
+		return &o
+	}
+	return c.store.Create(OutletBucket, fn)
+}
+
+// *** same as jacks
+func (c *Outlets) Update(id string, o Outlet) error {
+	o.ID = id
+	if err := o.IsValid(c.drivers); err != nil {
+		return err
+	}
+	return c.store.Update(OutletBucket, id, o)
+}
+
+// *** same as jacks
+func (c *Outlets) Delete(id string) error {
+	o, err := c.Get(id)
+	if err != nil {
+		return err
+	}
+	if o.Equipment != "" {
+		return fmt.Errorf("Outlet: %s has equipment: %s attached to it.", o.Name, o.Equipment)
+	}
+	return c.store.Delete(OutletBucket, id)
+}
+
+// *** different from jacks
 func (c *Outlets) Configure(id string, on bool) error {
 	o, err := c.Get(id)
 	if err != nil {
@@ -87,54 +147,7 @@ func (c *Outlets) Configure(id string, on bool) error {
 	return pin.Write(on)
 }
 
-func (c *Outlets) Create(o Outlet) error {
-	if err := o.IsValid(c.drivers); err != nil {
-		return err
-	}
-	fn := func(id string) interface{} {
-		o.ID = id
-		return &o
-	}
-	return c.store.Create(OutletBucket, fn)
-}
-
-func (c *Outlets) Update(id string, o Outlet) error {
-	o.ID = id
-	if err := o.IsValid(c.drivers); err != nil {
-		return err
-	}
-	return c.store.Update(OutletBucket, id, o)
-}
-
-func (c *Outlets) List() ([]Outlet, error) {
-	outlets := []Outlet{}
-	fn := func(_ string, v []byte) error {
-		var o Outlet
-		if err := json.Unmarshal(v, &o); err != nil {
-			return err
-		}
-		outlets = append(outlets, o)
-		return nil
-	}
-	return outlets, c.store.List(OutletBucket, fn)
-}
-
-func (c *Outlets) Delete(id string) error {
-	o, err := c.Get(id)
-	if err != nil {
-		return err
-	}
-	if o.Equipment != "" {
-		return fmt.Errorf("Outlet: %s has equipment: %s attached to it.", o.Name, o.Equipment)
-	}
-	return c.store.Delete(OutletBucket, id)
-}
-
-func (c *Outlets) Get(id string) (Outlet, error) {
-	var o Outlet
-	return o, c.store.Get(OutletBucket, id, &o)
-}
-
+// *** same as jacks
 func (e *Outlets) LoadAPI(r *mux.Router) {
 
 	// swagger:operation GET /api/outlets/{id} Outlet outletGet
@@ -221,6 +234,8 @@ func (e *Outlets) LoadAPI(r *mux.Router) {
 	//  description: Not Found
 	r.HandleFunc("/api/outlets/{id}", e.update).Methods("POST")
 }
+
+// *** same as jacks
 func (c *Outlets) get(w http.ResponseWriter, r *http.Request) {
 	fn := func(id string) (interface{}, error) {
 		return c.Get(id)
@@ -228,6 +243,7 @@ func (c *Outlets) get(w http.ResponseWriter, r *http.Request) {
 	utils.JSONGetResponse(fn, w, r)
 }
 
+// *** same as jacks
 func (c *Outlets) list(w http.ResponseWriter, r *http.Request) {
 	fn := func() (interface{}, error) {
 		return c.List()
@@ -235,6 +251,7 @@ func (c *Outlets) list(w http.ResponseWriter, r *http.Request) {
 	utils.JSONListResponse(fn, w, r)
 }
 
+// *** same as jacks
 func (c *Outlets) update(w http.ResponseWriter, r *http.Request) {
 	var o Outlet
 	fn := func(id string) error {
@@ -243,6 +260,7 @@ func (c *Outlets) update(w http.ResponseWriter, r *http.Request) {
 	utils.JSONUpdateResponse(&o, fn, w, r)
 }
 
+// *** same as jacks
 func (c *Outlets) create(w http.ResponseWriter, r *http.Request) {
 	var o Outlet
 	fn := func() error {
@@ -251,6 +269,7 @@ func (c *Outlets) create(w http.ResponseWriter, r *http.Request) {
 	utils.JSONCreateResponse(&o, fn, w, r)
 }
 
+// *** same as jacks
 func (c *Outlets) delete(w http.ResponseWriter, r *http.Request) {
 	fn := func(id string) error {
 		return c.Delete(id)

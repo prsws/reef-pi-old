@@ -18,6 +18,7 @@ import (
 const JackBucket = storage.JackBucket
 
 // swagger:model jack
+// *** different from outlets
 type Jack struct {
 	ID      string `json:"id"`
 	Name    string `json:"name"`
@@ -26,11 +27,13 @@ type Jack struct {
 	Reverse bool   `json:"reverse"`
 }
 
+// *** same as outlets
 type Jacks struct {
 	store   storage.Store
 	drivers *drivers.Drivers
 }
 
+// *** different from outlets
 func (j Jack) pwmChannel(channel int, drvrs *drivers.Drivers) (hal.PWMChannel, error) {
 	d, err := drvrs.PWMDriver(j.Driver)
 	if err != nil {
@@ -39,6 +42,7 @@ func (j Jack) pwmChannel(channel int, drvrs *drivers.Drivers) (hal.PWMChannel, e
 	return d.PWMChannel(channel)
 }
 
+// *** same as outlets
 func (j Jack) IsValid(drvrs *drivers.Drivers) error {
 	if j.Name == "" {
 		return fmt.Errorf("Jack name can not be empty")
@@ -55,6 +59,7 @@ func (j Jack) IsValid(drvrs *drivers.Drivers) error {
 	return nil
 }
 
+// *** same as outlets
 func NewJacks(drivers *drivers.Drivers, store storage.Store) *Jacks {
 	return &Jacks{
 		store:   store,
@@ -62,6 +67,7 @@ func NewJacks(drivers *drivers.Drivers, store storage.Store) *Jacks {
 	}
 }
 
+// *** same as outlets
 func (c *Jacks) Setup() error {
 	if err := c.store.CreateBucket(JackBucket); err != nil {
 		return err
@@ -70,11 +76,13 @@ func (c *Jacks) Setup() error {
 	return nil
 }
 
+// *** same as outlets
 func (c *Jacks) Get(id string) (Jack, error) {
 	var j Jack
 	return j, c.store.Get(JackBucket, id, &j)
 }
 
+// *** same as outlets
 func (c *Jacks) List() ([]Jack, error) {
 	jacks := []Jack{}
 	fn := func(_ string, v []byte) error {
@@ -88,6 +96,7 @@ func (c *Jacks) List() ([]Jack, error) {
 	return jacks, c.store.List(JackBucket, fn)
 }
 
+// *** same as outlets
 func (c *Jacks) Create(j Jack) error {
 	if err := j.IsValid(c.drivers); err != nil {
 		return err
@@ -103,6 +112,7 @@ func (c *Jacks) Create(j Jack) error {
 	return nil
 }
 
+// *** same as outlets
 func (c *Jacks) Update(id string, j Jack) error {
 	if err := j.IsValid(c.drivers); err != nil {
 		return err
@@ -114,6 +124,7 @@ func (c *Jacks) Update(id string, j Jack) error {
 	return nil
 }
 
+// *** same as outlets
 func (c *Jacks) Delete(id string) error {
 	_, err := c.Get(id)
 	if err != nil {
@@ -122,6 +133,7 @@ func (c *Jacks) Delete(id string) error {
 	return c.store.Delete(JackBucket, id)
 }
 
+// *** same as outlets
 func (c *Jacks) LoadAPI(r *mux.Router) {
 
 	// swagger:route GET /api/jacks Jack jackList
@@ -234,6 +246,7 @@ func (c *Jacks) LoadAPI(r *mux.Router) {
 
 type PinValues map[int]float64
 
+// different from outlets
 func (jacks *Jacks) Control(id string, values PinValues) error {
 	j, err := jacks.Get(id)
 	if err != nil {
@@ -261,6 +274,7 @@ func (jacks *Jacks) Control(id string, values PinValues) error {
 	return nil
 }
 
+// different from outlets
 func (c *Jacks) control(w http.ResponseWriter, r *http.Request) {
 	var v PinValues
 	fn := func(id string) error {
@@ -269,6 +283,7 @@ func (c *Jacks) control(w http.ResponseWriter, r *http.Request) {
 	utils.JSONUpdateResponse(&v, fn, w, r)
 }
 
+// *** same as outlets
 func (c *Jacks) get(w http.ResponseWriter, r *http.Request) {
 	fn := func(id string) (interface{}, error) {
 		return c.Get(id)
@@ -276,6 +291,7 @@ func (c *Jacks) get(w http.ResponseWriter, r *http.Request) {
 	utils.JSONGetResponse(fn, w, r)
 }
 
+// *** same as outlets
 func (c *Jacks) list(w http.ResponseWriter, r *http.Request) {
 	fn := func() (interface{}, error) {
 		return c.List()
@@ -283,14 +299,7 @@ func (c *Jacks) list(w http.ResponseWriter, r *http.Request) {
 	utils.JSONListResponse(fn, w, r)
 }
 
-func (c *Jacks) create(w http.ResponseWriter, r *http.Request) {
-	var j Jack
-	fn := func() error {
-		return c.Create(j)
-	}
-	utils.JSONCreateResponse(&j, fn, w, r)
-}
-
+// *** same as outlets
 func (c *Jacks) update(w http.ResponseWriter, r *http.Request) {
 	var j Jack
 	fn := func(id string) error {
@@ -299,6 +308,16 @@ func (c *Jacks) update(w http.ResponseWriter, r *http.Request) {
 	utils.JSONUpdateResponse(&j, fn, w, r)
 }
 
+// *** same as outlets
+func (c *Jacks) create(w http.ResponseWriter, r *http.Request) {
+	var j Jack
+	fn := func() error {
+		return c.Create(j)
+	}
+	utils.JSONCreateResponse(&j, fn, w, r)
+}
+
+// *** same as outlets
 func (c *Jacks) delete(w http.ResponseWriter, r *http.Request) {
 	fn := func(id string) error {
 		return c.Delete(id)
